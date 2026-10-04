@@ -1,0 +1,31 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "today": "Today",
+    "loading": "Loading..."
+  },
+  "index": {
+    "title": "Expenses",
+    "empty": "No expenses",
+    "emptyHint": "Tap Add to record your first expense.",
+    "thisMonth": "This month",
+    "add": "Add"
+  },
+  "add": {
+    "title": "Add expense",
+    "amount": "Amount",
+    "currency": "Currency",
+    "label": "Label",
+    "note": "Note (optional)",
+    "submit": "Add expense",
+    "amountInvalid": "Enter an amount greater than zero",
+    "currencyInvalid": "Enter a 3-letter currency code",
+    "labelRequired": "Enter a label"
+  },
+  "expense": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  }
+}

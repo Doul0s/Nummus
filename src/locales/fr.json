@@ -1,0 +1,32 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "today": "Aujourd'hui",
+    "loading": "Chargement…"
+  },
+  "index": {
+    "title": "Dépenses",
+    "empty": "Aucune dépense",
+    "emptyHint": "Touchez Ajouter pour saisir votre première dépense.",
+    "total": "Total",
+    "add": "Ajouter",
+    "thisMonth": "Ce mois-ci"
+  },
+  "add": {
+    "title": "Ajouter une dépense",
+    "amount": "Montant",
+    "label": "Libellé",
+    "note": "Note (facultatif)",
+    "submit": "Ajouter la dépense",
+    "amountInvalid": "Saisissez un montant supérieur à zéro",
+    "currency": "Devise",
+    "currencyInvalid": "Saisissez un code de devise à 3 lettres",
+    "labelRequired": "Saisissez un libellé"
+  },
+  "expense": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier"
+  }
+}
