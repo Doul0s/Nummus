@@ -23,10 +23,16 @@
     "amountInvalid": "Saisissez un montant supérieur à zéro",
     "currency": "Devise",
     "currencyInvalid": "Saisissez un code de devise à 3 lettres",
-    "labelRequired": "Saisissez un libellé"
+    "labelRequired": "Saisissez un libellé",
+    "date": "Date"
   },
   "expense": {
     "today": "Aujourd'hui",
-    "yesterday": "Hier"
+    "yesterday": "Hier",
+    "deleteTitle": "Supprimer la dépense",
+    "deleteMessage": "Êtes-vous sûr de vouloir supprimer cette dépense ?"
+  },
+  "edit": {
+    "title": "Modifier la dépense"
   }
 }

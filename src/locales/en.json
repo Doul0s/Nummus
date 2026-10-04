@@ -22,10 +22,16 @@
     "submit": "Add expense",
     "amountInvalid": "Enter an amount greater than zero",
     "currencyInvalid": "Enter a 3-letter currency code",
-    "labelRequired": "Enter a label"
+    "labelRequired": "Enter a label",
+    "date": "Date"
   },
   "expense": {
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "deleteTitle": "Delete expense",
+    "deleteMessage": "Are you sure you want to delete this expense?"
+  },
+  "edit": {
+    "title": "Edit expense"
   }
 }

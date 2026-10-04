@@ -17,6 +17,11 @@ export function fractionDigits(currencyCode: CurrencyCode): number {
   );
 }
 
+export function minorUnitsToInput(minorUnits: number, currencyCode: CurrencyCode): string {
+  const digits = fractionDigits(currencyCode);
+  return (minorUnits / 10 ** digits).toFixed(digits);
+}
+
 export function formatMoney(
   minorUnits: number,
   currencyCode: CurrencyCode = getDeviceCurrency()

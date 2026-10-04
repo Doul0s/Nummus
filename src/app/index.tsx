@@ -2,7 +2,7 @@ import { Link, Stack, useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SectionList, StyleSheet, Text, View } from "react-native";
+import { Pressable, SectionList, StyleSheet, Text, View } from "react-native";
 
 import { CurrencyTotal, Expense, listExpenses, sumExpensesByCurrency } from "@/db/expenses";
 import { formatDayLabel, formatMonthLabel, monthKeyOf, monthRange, todayIso } from "@/lib/date";
@@ -52,13 +52,15 @@ export default function Index() {
             <Text style={styles.sectionHeader}>{section.title}</Text>
           )}
           renderItem={({ item }) => (
-            <View style={styles.row}>
-              <View>
-                <Text>{item.label}</Text>
-                <Text style={styles.rowDate}>{formatDayLabel(item.spentAt, i18n.language)}</Text>
-              </View>
-              <Text>{formatMoney(item.amountMinor, item.currencyCode)}</Text>
-            </View>
+            <Link href={{ pathname: "/expense/[id]", params: { id: String(item.id) } }} asChild>
+              <Pressable style={styles.row}>
+                <View>
+                  <Text>{item.label}</Text>
+                  <Text style={styles.rowDate}>{formatDayLabel(item.spentAt, i18n.language)}</Text>
+                </View>
+                <Text>{formatMoney(item.amountMinor, item.currencyCode)}</Text>
+              </Pressable>
+            </Link>
           )}
         />
       )}

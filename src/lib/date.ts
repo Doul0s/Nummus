@@ -1,6 +1,6 @@
 import { getCalendars } from "expo-localization";
-import i18nInstance from "@/lib/i18n";
 
+import i18nInstance from "@/lib/i18n";
 
 export type IsoDate = string;
 
@@ -16,6 +16,11 @@ export function getDeviceFirstWeekday(): number {
 
 export function toIsoDate(date: Date): IsoDate {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export function fromIsoDate(isoDate: IsoDate): Date {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return new Date(y, m - 1, d);
 }
 
 export function todayIso(): IsoDate {
@@ -36,8 +41,7 @@ export function formatMonthLabel(monthKey: string, languageTag: string): string 
   const [y, m] = monthKey.split("-").map(Number);
   return new Intl.DateTimeFormat(languageTag, { month: "long", year: "numeric" }).format(
     new Date(y, m - 1, 1)
-  ); // note: keeping function signature as is; also ensure we don't need i18n here? We don't use i18nInstance now
-
+  );
 }
 
 export function formatDayLabel(isoDate: IsoDate, languageTag: string): string {
@@ -47,10 +51,9 @@ export function formatDayLabel(isoDate: IsoDate, languageTag: string): string {
   yesterday.setDate(yesterday.getDate() - 1);
   if (isoDate === toIsoDate(yesterday)) return i18nInstance.t("expense.yesterday");
 
-  const [y, m, d] = isoDate.split("-").map(Number);
   return new Intl.DateTimeFormat(languageTag, {
     day: "numeric",
     month: "short",
     year: "numeric",
-  }).format(new Date(y, m - 1, d));
+  }).format(fromIsoDate(isoDate));
 }
