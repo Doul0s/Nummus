@@ -1,12 +1,13 @@
 import { router, useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { AppState, ScrollView, StyleSheet, View } from "react-native";
 
 import { ExpenseRow } from "@/components/ExpenseRow";
 import { AddFab, EmptyState, IconButton, ScreenHeader, SectionHeader, Stat } from "@/components/ui";
 import { CurrencyTotal, Expense, listRecentExpenses, sumExpensesByCurrency } from "@/db/expenses";
+import { generateDueExpenses } from "@/db/recurring";
 import { getDeviceFirstWeekday, monthKeyOf, monthRange, todayIso, weekRange } from "@/lib/date";
 import { formatMoney, getDeviceCurrency } from "@/lib/money";
 import { layout, spacing } from "@/theme";
@@ -23,16 +24,47 @@ export default function Home() {
   const { t } = useTranslation();
   const [monthTotals, setMonthTotals] = useState<CurrencyTotal[]>([]);
   const [weekTotals, setWeekTotals] = useState<CurrencyTotal[]>([]);
+  const [recurringTotals, setRecurringTotals] = useState<CurrencyTotal[]>([]);
   const [recent, setRecent] = useState<Expense[]>([]);
+
+  const load = useCallback(async () => {
+    const today = todayIso();
+    try {
+      await generateDueExpenses(db, today);
+    } catch (error) {
+      // Keep showing what we already have; the totals below are still worth fetching.
+      console.warn("Nummus: recurring expense generation failed", error);
+    }
+    const month = monthRange(monthKeyOf(today));
+    try {
+      const [monthly, weekly, recurring, latest] = await Promise.all([
+        sumExpensesByCurrency(db, month),
+        sumExpensesByCurrency(db, weekRange(today, getDeviceFirstWeekday())),
+        sumExpensesByCurrency(db, month, true),
+        listRecentExpenses(db, RECENT_LIMIT),
+      ]);
+      setMonthTotals(monthly);
+      setWeekTotals(weekly);
+      setRecurringTotals(recurring);
+      setRecent(latest);
+    } catch (error) {
+      // Both callers fire and forget, so this must never reject unhandled.
+      console.warn("Nummus: home refresh failed", error);
+    }
+  }, [db]);
 
   useFocusEffect(
     useCallback(() => {
-      const today = todayIso();
-      sumExpensesByCurrency(db, monthRange(monthKeyOf(today))).then(setMonthTotals);
-      sumExpensesByCurrency(db, weekRange(today, getDeviceFirstWeekday())).then(setWeekTotals);
-      listRecentExpenses(db, RECENT_LIMIT).then(setRecent);
-    }, [db])
+      load();
+    }, [load])
   );
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") load();
+    });
+    return () => subscription.remove();
+  }, [load]);
 
   return (
     <View style={styles.container}>
@@ -52,6 +84,7 @@ export default function Home() {
           <Stat label={t("index.thisMonth")} values={amounts(monthTotals)} size="hero" />
           <View style={styles.statRow}>
             <Stat label={t("index.thisWeek")} values={amounts(weekTotals)} />
+            <Stat label={t("index.recurring")} values={amounts(recurringTotals)} />
           </View>
         </View>
 

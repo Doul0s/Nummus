@@ -9,6 +9,7 @@ export type Expense = {
   label: string;
   note: string | null;
   spentAt: IsoDate;
+  recurringId: number | null;
   createdAt: string;
 };
 
@@ -20,14 +21,14 @@ export type NewExpense = {
   spentAt: IsoDate;
 };
 
-export type ExpensePatch = Partial<Omit<Expense, "id" | "createdAt">>;
+export type ExpensePatch = Partial<Omit<Expense, "id" | "createdAt" | "recurringId">>;
 
 export type DateRange = { startIso: IsoDate; endIso: IsoDate };
 
 export type CurrencyTotal = { currencyCode: string; totalMinor: number };
 
 const COLUMNS = `id, amount_minor AS amountMinor, currency_code AS currencyCode, label, note,
-  spent_at AS spentAt, created_at AS createdAt`;
+  spent_at AS spentAt, recurring_id AS recurringId, created_at AS createdAt`;
 
 const FIELD_TO_COLUMN = {
   amountMinor: "amount_minor",
@@ -37,14 +38,19 @@ const FIELD_TO_COLUMN = {
   spentAt: "spent_at",
 } as const;
 
-function rangeClause(range?: DateRange) {
-  return range
-    ? { where: "WHERE spent_at >= ? AND spent_at < ?", params: [range.startIso, range.endIso] }
-    : { where: "", params: [] as string[] };
+function whereClause(range?: DateRange, onlyRecurring = false) {
+  const conditions: string[] = [];
+  const params: string[] = [];
+  if (range) {
+    conditions.push("spent_at >= ? AND spent_at < ?");
+    params.push(range.startIso, range.endIso);
+  }
+  if (onlyRecurring) conditions.push("recurring_id IS NOT NULL");
+  return { where: conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "", params };
 }
 
 export async function listExpenses(db: SQLiteDatabase, range?: DateRange): Promise<Expense[]> {
-  const { where, params } = rangeClause(range);
+  const { where, params } = whereClause(range);
   return db.getAllAsync<Expense>(
     `SELECT ${COLUMNS} FROM expenses ${where} ORDER BY spent_at DESC, id DESC`,
     params
@@ -91,9 +97,10 @@ export async function deleteExpense(db: SQLiteDatabase, id: number): Promise<voi
 
 export async function sumExpensesByCurrency(
   db: SQLiteDatabase,
-  range?: DateRange
+  range?: DateRange,
+  onlyRecurring = false
 ): Promise<CurrencyTotal[]> {
-  const { where, params } = rangeClause(range);
+  const { where, params } = whereClause(range, onlyRecurring);
   return db.getAllAsync<CurrencyTotal>(
     `SELECT currency_code AS currencyCode, SUM(amount_minor) AS totalMinor
      FROM expenses ${where} GROUP BY currency_code ORDER BY totalMinor DESC`,

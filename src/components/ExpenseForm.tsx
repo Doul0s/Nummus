@@ -5,21 +5,32 @@ import { useTranslation } from "react-i18next";
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { CurrencyPicker } from "@/components/CurrencyPicker";
-import { AmountInput, AppText, Button, Field, FieldLabel } from "@/components/ui";
+import {
+  AmountInput,
+  AppText,
+  Button,
+  Field,
+  FieldLabel,
+  Segmented,
+  ToggleRow,
+} from "@/components/ui";
 import type { Expense, NewExpense } from "@/db/expenses";
 import { IsoDate, formatDayLabel, fromIsoDate, todayIso, toIsoDate } from "@/lib/date";
 import { getDeviceCurrency, minorUnitsToInput, parseAmountToMinorUnits } from "@/lib/money";
+import type { Interval } from "@/lib/recurring";
 import { layout, radius, spacing, useTheme } from "@/theme";
 
 type DateFieldProps = {
   value: IsoDate;
+  allowFuture: boolean;
   onChange: (value: IsoDate) => void;
 };
 
-function DateField({ value, onChange }: DateFieldProps) {
+function DateField({ value, allowFuture, onChange }: DateFieldProps) {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const date = fromIsoDate(value);
+  const maximumDate = allowFuture ? undefined : new Date();
 
   const handleChange = (_: unknown, picked?: Date) => {
     if (picked) onChange(toIsoDate(picked));
@@ -32,7 +43,7 @@ function DateField({ value, onChange }: DateFieldProps) {
           value={date}
           mode="date"
           display="compact"
-          maximumDate={new Date()}
+          maximumDate={maximumDate}
           accentColor={theme.accent}
           onChange={handleChange}
         />
@@ -45,12 +56,7 @@ function DateField({ value, onChange }: DateFieldProps) {
       accessibilityRole="button"
       style={[styles.dateAndroid, { borderBottomColor: theme.border }]}
       onPress={() =>
-        DateTimePickerAndroid.open({
-          value: date,
-          mode: "date",
-          maximumDate: new Date(),
-          onChange: handleChange,
-        })
+        DateTimePickerAndroid.open({ value: date, mode: "date", maximumDate, onChange: handleChange })
       }
     >
       <AppText>{formatDayLabel(value, i18n.language)}</AppText>
@@ -61,14 +67,22 @@ function DateField({ value, onChange }: DateFieldProps) {
 type Props = {
   initial?: Expense;
   defaultCurrency?: string;
+  defaultRepeat?: boolean;
   submitLabel: string;
-  onSubmit: (values: NewExpense) => Promise<void>;
+  onSubmit: (values: NewExpense, repeat: Interval | null) => Promise<void>;
   onDelete?: () => void;
 };
 
 type Errors = { amount?: string; label?: string };
 
-export function ExpenseForm({ initial, defaultCurrency, submitLabel, onSubmit, onDelete }: Props) {
+export function ExpenseForm({
+  initial,
+  defaultCurrency,
+  defaultRepeat,
+  submitLabel,
+  onSubmit,
+  onDelete,
+}: Props) {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -77,6 +91,8 @@ export function ExpenseForm({ initial, defaultCurrency, submitLabel, onSubmit, o
   const [label, setLabel] = useState(initial?.label ?? "");
   const [spentAt, setSpentAt] = useState(initial?.spentAt ?? todayIso());
   const [note, setNote] = useState(initial?.note ?? "");
+  const [repeating, setRepeating] = useState(!initial && (defaultRepeat ?? false));
+  const [period, setPeriod] = useState<Interval>("monthly");
   const [errors, setErrors] = useState<Errors>({});
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -92,13 +108,16 @@ export function ExpenseForm({ initial, defaultCurrency, submitLabel, onSubmit, o
 
     setSaving(true);
     try {
-      await onSubmit({
-        amountMinor,
-        currencyCode: currency,
-        label: label.trim(),
-        note: note.trim() || null,
-        spentAt,
-      });
+      await onSubmit(
+        {
+          amountMinor,
+          currencyCode: currency,
+          label: label.trim(),
+          note: repeating ? null : note.trim() || null,
+          spentAt,
+        },
+        repeating ? period : null
+      );
     } finally {
       setSaving(false);
     }
@@ -118,10 +137,14 @@ export function ExpenseForm({ initial, defaultCurrency, submitLabel, onSubmit, o
               onChangeText={setAmount}
               autoFocus={!initial}
               error={errors.amount}
+              accessibilityLabel={t("add.amount")}
             />
           </View>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel={t("currency.title")}
+            accessibilityValue={{ text: currency }}
+            accessibilityHint={t("currency.hint")}
             onPress={() => setPickerOpen(true)}
             style={[styles.chip, { borderColor: theme.border }]}
           >
@@ -138,18 +161,41 @@ export function ExpenseForm({ initial, defaultCurrency, submitLabel, onSubmit, o
           error={errors.label}
         />
 
-        <View style={styles.dateBlock}>
-          <FieldLabel>{t("add.date")}</FieldLabel>
-          <DateField value={spentAt} onChange={setSpentAt} />
+        {initial ? null : (
+          <View style={styles.block}>
+            <ToggleRow label={t("add.repeats")} value={repeating} onValueChange={setRepeating} />
+            {repeating ? (
+              <Segmented
+                value={period}
+                onChange={setPeriod}
+                options={[
+                  { value: "monthly", label: t("add.monthly") },
+                  { value: "yearly", label: t("add.yearly") },
+                ]}
+              />
+            ) : null}
+          </View>
+        )}
+
+        <View style={styles.block}>
+          <FieldLabel>{repeating ? t("add.starts") : t("add.date")}</FieldLabel>
+          <DateField value={spentAt} allowFuture={repeating} onChange={setSpentAt} />
+          {repeating && spentAt < todayIso() ? (
+            <AppText variant="caption" tone="muted">
+              {t("add.backfill")}
+            </AppText>
+          ) : null}
         </View>
 
-        <Field
-          label={t("add.note")}
-          value={note}
-          onChangeText={setNote}
-          placeholder={t("add.note")}
-          multiline
-        />
+        {repeating ? null : (
+          <Field
+            label={t("add.note")}
+            value={note}
+            onChangeText={setNote}
+            placeholder={t("add.note")}
+            multiline
+          />
+        )}
 
         <View style={styles.actions}>
           <Button title={submitLabel} onPress={submit} disabled={saving} />
@@ -190,8 +236,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: radius.md,
   },
-  dateBlock: {
-    gap: spacing.xs,
+  block: {
+    gap: spacing.sm,
   },
   dateIos: {
     alignSelf: "flex-start",

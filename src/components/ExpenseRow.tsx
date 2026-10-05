@@ -12,12 +12,13 @@ type Props = {
 };
 
 export function ExpenseRow({ expense, last }: Props) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const day = formatDayLabel(expense.spentAt, i18n.language);
 
   return (
     <ListRow
       title={expense.label}
-      subtitle={formatDayLabel(expense.spentAt, i18n.language)}
+      subtitle={expense.recurringId === null ? day : `${day} · ${t("expense.recurring")}`}
       value={formatMoney(expense.amountMinor, expense.currencyCode)}
       last={last}
       onPress={() => router.push({ pathname: "/expense/[id]", params: { id: String(expense.id) } })}

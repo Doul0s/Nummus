@@ -11,23 +11,31 @@
     "thisMonth": "Ce mois-ci",
     "thisWeek": "Cette semaine",
     "recent": "Récents",
-    "seeAll": "Tout voir"
+    "seeAll": "Tout voir",
+    "recurring": "Récurrent"
   },
   "add": {
     "title": "Ajouter une dépense",
     "label": "Description",
     "note": "Note (facultatif)",
     "submit": "Ajouter la dépense",
+    "amount": "Montant",
     "amountInvalid": "Saisissez un montant supérieur à zéro",
     "labelRequired": "Saisissez un libellé",
     "date": "Date",
-    "labelPlaceholder": "Café, courses…"
+    "labelPlaceholder": "Café, courses…",
+    "repeats": "Répéter",
+    "monthly": "Mensuel",
+    "yearly": "Annuel",
+    "starts": "Commence le",
+    "backfill": "Chaque répétition depuis cette date sera ajoutée."
   },
   "expense": {
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "deleteTitle": "Supprimer cette dépense ?",
-    "deleteMessage": "Cette action est irréversible."
+    "deleteMessage": "Cette action est irréversible.",
+    "recurring": "Récurrent"
   },
   "edit": {
     "title": "Modifier la dépense"
@@ -43,7 +51,14 @@
   "subscriptions": {
     "title": "Abonnements",
     "empty": "Aucun abonnement",
-    "emptyHint": "Vos dépenses récurrentes apparaîtront ici."
+    "emptyHint": "Touchez + pour ajouter une dépense récurrente.",
+    "perMonth": "Par mois",
+    "active": "Actifs",
+    "paused": "En pause",
+    "next": "Prochain : {{date}}",
+    "pause": "Mettre en pause",
+    "resume": "Reprendre",
+    "manageHint": "La suppression arrête les prochains prélèvements. Les dépenses passées sont conservées."
   },
   "settings": {
     "title": "Réglages",
@@ -53,6 +68,7 @@
   },
   "currency": {
     "title": "Devise",
-    "search": "Rechercher une devise"
+    "search": "Rechercher une devise",
+    "hint": "Ouvre la liste des devises"
   }
 }

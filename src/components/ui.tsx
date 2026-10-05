@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import {
   Pressable,
   StyleSheet,
+  Switch,
   Text,
   TextInput,
   type TextInputProps,
@@ -273,7 +274,59 @@ export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   );
 }
 
-export function AddFab() {
+type SegmentedProps<T extends string> = {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+};
+
+export function Segmented<T extends string>({ options, value, onChange }: SegmentedProps<T>) {
+  const theme = useTheme();
+
+  return (
+    <View style={[styles.segmented, { borderColor: theme.border }]}>
+      {options.map((option) => {
+        const selected = option.value === value;
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            onPress={() => onChange(option.value)}
+            style={[styles.segment, selected && { backgroundColor: theme.text }]}
+          >
+            <AppText variant="caption" style={{ color: selected ? theme.bg : theme.text, fontWeight: "600" }}>
+              {option.label}
+            </AppText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+type ToggleRowProps = {
+  label: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+};
+
+export function ToggleRow({ label, value, onValueChange }: ToggleRowProps) {
+  const theme = useTheme();
+
+  return (
+    <View style={styles.toggleRow}>
+      <AppText>{label}</AppText>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: theme.border, true: theme.accent }}
+      />
+    </View>
+  );
+}
+
+export function AddFab({ repeat }: { repeat?: boolean }) {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -281,7 +334,7 @@ export function AddFab() {
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={t("index.add")}
-      onPress={() => router.push("/add")}
+      onPress={() => router.push(repeat ? { pathname: "/add", params: { repeat: "1" } } : "/add")}
       style={({ pressed }) => [styles.fab, { backgroundColor: theme.text, opacity: pressed ? 0.8 : 1 }]}
     >
       <AppText style={[styles.fabPlus, { color: theme.bg }]}>+</AppText>
@@ -348,6 +401,22 @@ const styles = StyleSheet.create({
   },
   rowValue: {
     fontWeight: "600",
+  },
+  segmented: {
+    flexDirection: "row",
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderRadius: radius.md,
+    overflow: "hidden",
+  },
+  segment: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  toggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   empty: {
     alignItems: "center",

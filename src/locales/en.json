@@ -11,23 +11,31 @@
     "add": "Add",
     "thisWeek": "This week",
     "recent": "Recent",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "recurring": "Recurring"
   },
   "add": {
     "title": "Add expense",
     "label": "Description",
     "note": "Note (optional)",
     "submit": "Add expense",
+    "amount": "Amount",
     "amountInvalid": "Enter an amount greater than zero",
     "labelRequired": "Enter a label",
     "date": "Date",
-    "labelPlaceholder": "Coffee, groceries…"
+    "labelPlaceholder": "Coffee, groceries…",
+    "repeats": "Repeats",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "starts": "Starts",
+    "backfill": "Every repeat since this date will be added."
   },
   "expense": {
     "today": "Today",
     "yesterday": "Yesterday",
     "deleteTitle": "Delete this expense?",
-    "deleteMessage": "This can't be undone."
+    "deleteMessage": "This can't be undone.",
+    "recurring": "Recurring"
   },
   "edit": {
     "title": "Edit expense"
@@ -43,7 +51,14 @@
   "subscriptions": {
     "title": "Subscriptions",
     "empty": "No subscriptions yet",
-    "emptyHint": "Recurring expenses will appear here."
+    "emptyHint": "Tap + to add a recurring expense.",
+    "perMonth": "Per month",
+    "active": "Active",
+    "paused": "Paused",
+    "next": "Next {{date}}",
+    "pause": "Pause",
+    "resume": "Resume",
+    "manageHint": "Deleting stops future charges. Past expenses are kept."
   },
   "settings": {
     "title": "Settings",
@@ -53,6 +68,7 @@
   },
   "currency": {
     "title": "Currency",
-    "search": "Search currency"
+    "search": "Search currency",
+    "hint": "Opens the list of currencies"
   }
 }
