@@ -8,9 +8,11 @@
     "scheme": "nummus",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.nummus.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.nummus.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -35,7 +37,8 @@
       ],
       "expo-sqlite",
       "expo-localization",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

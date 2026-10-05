@@ -100,3 +100,17 @@ export async function sumExpensesByCurrency(
     params
   );
 }
+
+export async function listRecentExpenses(db: SQLiteDatabase, limit: number): Promise<Expense[]> {
+  return db.getAllAsync<Expense>(
+    `SELECT ${COLUMNS} FROM expenses ORDER BY spent_at DESC, id DESC LIMIT ?`,
+    limit
+  );
+}
+
+export async function lastUsedCurrency(db: SQLiteDatabase): Promise<string | null> {
+  const row = await db.getFirstAsync<{ currencyCode: string }>(
+    "SELECT currency_code AS currencyCode FROM expenses ORDER BY id DESC LIMIT 1"
+  );
+  return row?.currencyCode ?? null;
+}

@@ -6,10 +6,6 @@ export type IsoDate = string;
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function getDeviceTimeZone(): string | null {
-  return getCalendars()[0]?.timeZone ?? null;
-}
-
 export function getDeviceFirstWeekday(): number {
   return getCalendars()[0]?.firstWeekday ?? 1;
 }
@@ -37,11 +33,23 @@ export function monthRange(monthKey: string): { startIso: IsoDate; endIso: IsoDa
   return { startIso: `${monthKey}-01`, endIso: `${next}-01` };
 }
 
+export function weekRange(
+  isoDate: IsoDate,
+  firstWeekday: number
+): { startIso: IsoDate; endIso: IsoDate } {
+  const date = fromIsoDate(isoDate);
+  const offset = (date.getDay() - (firstWeekday - 1) + 7) % 7;
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate() - offset);
+  const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7);
+  return { startIso: toIsoDate(start), endIso: toIsoDate(end) };
+}
+
 export function formatMonthLabel(monthKey: string, languageTag: string): string {
   const [y, m] = monthKey.split("-").map(Number);
-  return new Intl.DateTimeFormat(languageTag, { month: "long", year: "numeric" }).format(
+  const label = new Intl.DateTimeFormat(languageTag, { month: "long", year: "numeric" }).format(
     new Date(y, m - 1, 1)
   );
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export function formatDayLabel(isoDate: IsoDate, languageTag: string): string {

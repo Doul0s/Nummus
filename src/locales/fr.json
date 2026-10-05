@@ -2,37 +2,57 @@
   "common": {
     "cancel": "Annuler",
     "save": "Enregistrer",
-    "delete": "Supprimer",
-    "today": "Aujourd'hui",
-    "loading": "Chargement…"
+    "delete": "Supprimer"
   },
   "index": {
-    "title": "Dépenses",
     "empty": "Aucune dépense",
     "emptyHint": "Touchez Ajouter pour saisir votre première dépense.",
-    "total": "Total",
     "add": "Ajouter",
-    "thisMonth": "Ce mois-ci"
+    "thisMonth": "Ce mois-ci",
+    "thisWeek": "Cette semaine",
+    "recent": "Récents",
+    "seeAll": "Tout voir"
   },
   "add": {
     "title": "Ajouter une dépense",
-    "amount": "Montant",
-    "label": "Libellé",
+    "label": "Description",
     "note": "Note (facultatif)",
     "submit": "Ajouter la dépense",
     "amountInvalid": "Saisissez un montant supérieur à zéro",
-    "currency": "Devise",
-    "currencyInvalid": "Saisissez un code de devise à 3 lettres",
     "labelRequired": "Saisissez un libellé",
-    "date": "Date"
+    "date": "Date",
+    "labelPlaceholder": "Café, courses…"
   },
   "expense": {
     "today": "Aujourd'hui",
     "yesterday": "Hier",
-    "deleteTitle": "Supprimer la dépense",
-    "deleteMessage": "Êtes-vous sûr de vouloir supprimer cette dépense ?"
+    "deleteTitle": "Supprimer cette dépense ?",
+    "deleteMessage": "Cette action est irréversible."
   },
   "edit": {
     "title": "Modifier la dépense"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "history": "Historique",
+    "subscriptions": "Abonnements"
+  },
+  "history": {
+    "title": "Historique"
+  },
+  "subscriptions": {
+    "title": "Abonnements",
+    "empty": "Aucun abonnement",
+    "emptyHint": "Vos dépenses récurrentes apparaîtront ici."
+  },
+  "settings": {
+    "title": "Réglages",
+    "language": "Langue",
+    "privacy": "Confidentialité",
+    "privacyText": "Nummus garde toutes vos données sur cet appareil. Pas de compte, pas de serveur, aucun suivi."
+  },
+  "currency": {
+    "title": "Devise",
+    "search": "Rechercher une devise"
   }
 }
