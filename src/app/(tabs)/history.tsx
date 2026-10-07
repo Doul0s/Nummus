@@ -1,16 +1,25 @@
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { SectionList, StyleSheet, View } from "react-native";
 
 import { ExpenseRow } from "@/components/ExpenseRow";
-import { AddFab, EmptyState, ScreenHeader, SectionHeader } from "@/components/ui";
-import { CurrencyTotal, Expense, listExpenses } from "@/db/expenses";
-import { formatMonthLabel, monthKeyOf } from "@/lib/date";
+import {
+  AddFab,
+  EmptyState,
+  Loading,
+  ScreenHeader,
+  SectionHeader,
+} from "@/components/ui";
+import { CurrencyTotal } from "@/db/dashboard";
+import { Expense, getExpensesSince, getHistoryPage } from "@/db/expenses";
+import { IsoDate, formatDayLabel } from "@/lib/date";
 import { formatMoney } from "@/lib/money";
 
-type Section = { title: string; totals: CurrencyTotal[]; data: Expense[] };
+const PAGE_DAYS = 20;
+
+type Section = { date: IsoDate; title: string; totals: CurrencyTotal[]; data: Expense[] };
 
 function sumByCurrency(rows: Expense[]): CurrencyTotal[] {
   const totals = new Map<string, number>();
@@ -20,16 +29,16 @@ function sumByCurrency(rows: Expense[]): CurrencyTotal[] {
   return [...totals].map(([currencyCode, totalMinor]) => ({ currencyCode, totalMinor }));
 }
 
-function groupByMonth(rows: Expense[], languageTag: string): Section[] {
-  const byMonth = new Map<string, Expense[]>();
+function groupByDay(rows: Expense[], languageTag: string): Section[] {
+  const byDay = new Map<IsoDate, Expense[]>();
   for (const row of rows) {
-    const key = monthKeyOf(row.spentAt);
-    const bucket = byMonth.get(key);
+    const bucket = byDay.get(row.spentAt);
     if (bucket) bucket.push(row);
-    else byMonth.set(key, [row]);
+    else byDay.set(row.spentAt, [row]);
   }
-  return [...byMonth].map(([key, data]) => ({
-    title: formatMonthLabel(key, languageTag),
+  return [...byDay].map(([date, data]) => ({
+    date,
+    title: formatDayLabel(date, languageTag),
     totals: sumByCurrency(data),
     data,
   }));
@@ -38,13 +47,57 @@ function groupByMonth(rows: Expense[], languageTag: string): Section[] {
 export default function History() {
   const db = useSQLiteContext();
   const { t, i18n } = useTranslation();
-  const [sections, setSections] = useState<Section[]>([]);
+  const [rows, setRows] = useState<Expense[]>([]);
+  const [cursor, setCursor] = useState<IsoDate | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [loadingMore, setLoadingMore] = useState(false);
+  const rowsRef = useRef<Expense[]>([]);
+  const busy = useRef(false);
+
+  const apply = (next: Expense[]) => {
+    rowsRef.current = next;
+    setRows(next);
+  };
+
+  const refresh = useCallback(async () => {
+    try {
+      const loaded = rowsRef.current;
+      if (loaded.length === 0) {
+        const page = await getHistoryPage(db, null, PAGE_DAYS);
+        apply(page.rows);
+        setCursor(page.nextCursor);
+      } else {
+        apply(await getExpensesSince(db, loaded[loaded.length - 1].spentAt));
+      }
+      setStatus("ready");
+    } catch {
+      setStatus("error");
+    }
+  }, [db]);
 
   useFocusEffect(
     useCallback(() => {
-      listExpenses(db).then((rows) => setSections(groupByMonth(rows, i18n.language)));
-    }, [db, i18n.language])
+      refresh();
+    }, [refresh])
   );
+
+  const loadMore = async () => {
+    if (cursor === null || busy.current) return;
+    busy.current = true;
+    setLoadingMore(true);
+    try {
+      const page = await getHistoryPage(db, cursor, PAGE_DAYS);
+      apply([...rowsRef.current, ...page.rows]);
+      setCursor(page.nextCursor);
+    } catch {
+      setStatus("error");
+    } finally {
+      busy.current = false;
+      setLoadingMore(false);
+    }
+  };
+
+  const sections = useMemo(() => groupByDay(rows, i18n.language), [rows, i18n.language]);
 
   return (
     <View style={styles.container}>
@@ -53,8 +106,29 @@ export default function History() {
         keyExtractor={(e) => String(e.id)}
         contentContainerStyle={styles.content}
         stickySectionHeadersEnabled={false}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
         ListHeaderComponent={<ScreenHeader title={t("history.title")} />}
-        ListEmptyComponent={<EmptyState title={t("index.empty")} hint={t("index.emptyHint")} />}
+        ListEmptyComponent={
+          status === "loading" ? (
+            <Loading />
+          ) : status === "error" ? (
+            <EmptyState
+              title={t("common.error")}
+              hint={t("common.tryAgain")}
+              actionLabel={t("common.retry")}
+              onAction={refresh}
+            />
+          ) : (
+            <EmptyState
+              title={t("index.empty")}
+              hint={t("index.emptyHint")}
+              actionLabel={t("index.addExpense")}
+              onAction={() => router.push("/add")}
+            />
+          )
+        }
+        ListFooterComponent={loadingMore ? <Loading /> : null}
         renderSectionHeader={({ section }) => (
           <SectionHeader
             title={section.title}

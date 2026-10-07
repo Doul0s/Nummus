@@ -8,17 +8,23 @@ import { formatMoney } from "@/lib/money";
 
 type Props = {
   expense: Expense;
+  showDate?: boolean;
   last?: boolean;
 };
 
-export function ExpenseRow({ expense, last }: Props) {
+export function ExpenseRow({ expense, showDate, last }: Props) {
   const { t, i18n } = useTranslation();
-  const day = formatDayLabel(expense.spentAt, i18n.language);
+  const meta = [
+    showDate ? formatDayLabel(expense.spentAt, i18n.language) : null,
+    expense.recurringId === null ? null : t("expense.recurring"),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <ListRow
       title={expense.label}
-      subtitle={expense.recurringId === null ? day : `${day} · ${t("expense.recurring")}`}
+      subtitle={meta || undefined}
       value={formatMoney(expense.amountMinor, expense.currencyCode)}
       last={last}
       onPress={() => router.push({ pathname: "/expense/[id]", params: { id: String(expense.id) } })}

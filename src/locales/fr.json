@@ -2,24 +2,28 @@
   "common": {
     "cancel": "Annuler",
     "save": "Enregistrer",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "error": "Une erreur est survenue",
+    "tryAgain": "Veuillez réessayer.",
+    "retry": "Réessayer"
   },
   "index": {
     "empty": "Aucune dépense",
-    "emptyHint": "Touchez Ajouter pour saisir votre première dépense.",
+    "emptyHint": "Commencez à suivre vos dépenses.",
     "add": "Ajouter",
     "thisMonth": "Ce mois-ci",
     "thisWeek": "Cette semaine",
     "recent": "Récents",
     "seeAll": "Tout voir",
-    "recurring": "Récurrent"
+    "recurring": "Récurrent",
+    "addExpense": "Ajouter une dépense",
+    "nextRenewal": "Prochain : {{label}} · {{when}}"
   },
   "add": {
     "title": "Ajouter une dépense",
     "label": "Description",
     "note": "Note (facultatif)",
     "submit": "Ajouter la dépense",
-    "amount": "Montant",
     "amountInvalid": "Saisissez un montant supérieur à zéro",
     "labelRequired": "Saisissez un libellé",
     "date": "Date",
@@ -28,7 +32,8 @@
     "monthly": "Mensuel",
     "yearly": "Annuel",
     "starts": "Commence le",
-    "backfill": "Chaque répétition depuis cette date sera ajoutée."
+    "backfill": "Les mois manqués jusqu'à aujourd'hui seront ajoutés.",
+    "saveFailed": "Enregistrement impossible. Veuillez réessayer."
   },
   "expense": {
     "today": "Aujourd'hui",
@@ -51,14 +56,19 @@
   "subscriptions": {
     "title": "Abonnements",
     "empty": "Aucun abonnement",
-    "emptyHint": "Touchez + pour ajouter une dépense récurrente.",
+    "emptyHint": "Ajoutez des dépenses récurrentes pour voir ce qui arrive.",
     "perMonth": "Par mois",
-    "active": "Actifs",
     "paused": "En pause",
-    "next": "Prochain : {{date}}",
     "pause": "Mettre en pause",
     "resume": "Reprendre",
-    "manageHint": "La suppression arrête les prochains prélèvements. Les dépenses passées sont conservées."
+    "manageHint": "La suppression arrête les prochains prélèvements. Les dépenses passées sont conservées.",
+    "add": "Ajouter un abonnement",
+    "perYear": "Par an",
+    "nextRenewal": "Prochain renouvellement",
+    "comingUp": "À venir",
+    "later": "Plus tard",
+    "tomorrow": "Demain",
+    "inDays": "Dans {{days}} jours"
   },
   "settings": {
     "title": "Réglages",
@@ -68,7 +78,6 @@
   },
   "currency": {
     "title": "Devise",
-    "search": "Rechercher une devise",
-    "hint": "Ouvre la liste des devises"
+    "search": "Rechercher une devise"
   }
 }

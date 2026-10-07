@@ -30,6 +30,19 @@ export function currencyName(code: CurrencyCode, languageTag: string): string {
   }
 }
 
+export function currencySymbol(code: CurrencyCode, languageTag: string): string {
+  try {
+    const parts = new Intl.NumberFormat(languageTag, {
+      style: "currency",
+      currency: code,
+      currencyDisplay: "narrowSymbol",
+    }).formatToParts(0);
+    return parts.find((part) => part.type === "currency")?.value ?? code;
+  } catch {
+    return code;
+  }
+}
+
 function fractionDigits(currencyCode: CurrencyCode): number {
   return (
     new Intl.NumberFormat("en", { style: "currency", currency: currencyCode }).resolvedOptions()

@@ -1,6 +1,7 @@
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { Stack } from "expo-router";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 
@@ -16,7 +17,12 @@ import {
 } from "@/components/ui";
 import type { Expense, NewExpense } from "@/db/expenses";
 import { IsoDate, formatDayLabel, fromIsoDate, todayIso, toIsoDate } from "@/lib/date";
-import { getDeviceCurrency, minorUnitsToInput, parseAmountToMinorUnits } from "@/lib/money";
+import {
+  currencySymbol,
+  getDeviceCurrency,
+  minorUnitsToInput,
+  parseAmountToMinorUnits,
+} from "@/lib/money";
 import type { Interval } from "@/lib/recurring";
 import { layout, radius, spacing, useTheme } from "@/theme";
 
@@ -84,7 +90,7 @@ export function ExpenseForm({
   onDelete,
 }: Props) {
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [currency, setCurrency] = useState(initial?.currencyCode ?? defaultCurrency ?? getDeviceCurrency());
   const [amount, setAmount] = useState(initial ? minorUnitsToInput(initial.amountMinor, currency) : "");
@@ -94,10 +100,14 @@ export function ExpenseForm({
   const [repeating, setRepeating] = useState(!initial && (defaultRepeat ?? false));
   const [period, setPeriod] = useState<Interval>("monthly");
   const [errors, setErrors] = useState<Errors>({});
+  const [saveFailed, setSaveFailed] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const submitting = useRef(false);
 
   const submit = async () => {
+    if (submitting.current) return;
+
     const amountMinor = parseAmountToMinorUnits(amount, currency);
     const next: Errors = {
       amount: amountMinor === null ? t("add.amountInvalid") : undefined,
@@ -106,7 +116,9 @@ export function ExpenseForm({
     setErrors(next);
     if (amountMinor === null || next.label) return;
 
+    submitting.current = true;
     setSaving(true);
+    setSaveFailed(false);
     try {
       await onSubmit(
         {
@@ -118,16 +130,33 @@ export function ExpenseForm({
         },
         repeating ? period : null
       );
+    } catch {
+      setSaveFailed(true);
     } finally {
+      submitting.current = false;
       setSaving(false);
     }
   };
 
+  const symbol = currencySymbol(currency, i18n.language);
+
   return (
     <>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable accessibilityRole="button" disabled={saving} hitSlop={12} onPress={submit}>
+              <AppText variant="headline" tone="accent">
+                {t("common.save")}
+              </AppText>
+            </Pressable>
+          ),
+        }}
+      />
       <ScrollView
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         automaticallyAdjustKeyboardInsets
       >
         <View style={styles.amountRow}>
@@ -137,18 +166,14 @@ export function ExpenseForm({
               onChangeText={setAmount}
               autoFocus={!initial}
               error={errors.amount}
-              accessibilityLabel={t("add.amount")}
             />
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t("currency.title")}
-            accessibilityValue={{ text: currency }}
-            accessibilityHint={t("currency.hint")}
             onPress={() => setPickerOpen(true)}
             style={[styles.chip, { borderColor: theme.border }]}
           >
-            <AppText variant="headline">{currency}</AppText>
+            <AppText variant="headline">{symbol === currency ? currency : `${symbol} ${currency}`}</AppText>
             <Ionicons name="chevron-down" size={16} color={theme.muted} />
           </Pressable>
         </View>
@@ -158,8 +183,19 @@ export function ExpenseForm({
           value={label}
           onChangeText={setLabel}
           placeholder={t("add.labelPlaceholder")}
+          returnKeyType="done"
           error={errors.label}
         />
+
+        <View style={styles.block}>
+          <FieldLabel>{repeating ? t("add.starts") : t("add.date")}</FieldLabel>
+          <DateField value={spentAt} allowFuture={repeating} onChange={setSpentAt} />
+          {repeating && spentAt < todayIso() ? (
+            <AppText variant="caption" tone="muted">
+              {t("add.backfill")}
+            </AppText>
+          ) : null}
+        </View>
 
         {initial ? null : (
           <View style={styles.block}>
@@ -177,16 +213,6 @@ export function ExpenseForm({
           </View>
         )}
 
-        <View style={styles.block}>
-          <FieldLabel>{repeating ? t("add.starts") : t("add.date")}</FieldLabel>
-          <DateField value={spentAt} allowFuture={repeating} onChange={setSpentAt} />
-          {repeating && spentAt < todayIso() ? (
-            <AppText variant="caption" tone="muted">
-              {t("add.backfill")}
-            </AppText>
-          ) : null}
-        </View>
-
         {repeating ? null : (
           <Field
             label={t("add.note")}
@@ -196,6 +222,12 @@ export function ExpenseForm({
             multiline
           />
         )}
+
+        {saveFailed ? (
+          <AppText variant="caption" tone="danger">
+            {t("add.saveFailed")}
+          </AppText>
+        ) : null}
 
         <View style={styles.actions}>
           <Button title={submitLabel} onPress={submit} disabled={saving} />
@@ -232,7 +264,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.compact,
     borderWidth: 1,
     borderRadius: radius.md,
   },

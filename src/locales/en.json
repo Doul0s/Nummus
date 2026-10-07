@@ -2,24 +2,28 @@
   "common": {
     "cancel": "Cancel",
     "save": "Save",
-    "delete": "Delete"
+    "delete": "Delete",
+    "error": "Something went wrong",
+    "tryAgain": "Please try again.",
+    "retry": "Retry"
   },
   "index": {
     "empty": "No expenses",
-    "emptyHint": "Tap Add to record your first expense.",
+    "emptyHint": "Start tracking your spending.",
     "thisMonth": "This month",
     "add": "Add",
     "thisWeek": "This week",
     "recent": "Recent",
     "seeAll": "See all",
-    "recurring": "Recurring"
+    "recurring": "Recurring",
+    "addExpense": "Add expense",
+    "nextRenewal": "Next: {{label}} · {{when}}"
   },
   "add": {
     "title": "Add expense",
     "label": "Description",
     "note": "Note (optional)",
     "submit": "Add expense",
-    "amount": "Amount",
     "amountInvalid": "Enter an amount greater than zero",
     "labelRequired": "Enter a label",
     "date": "Date",
@@ -28,7 +32,8 @@
     "monthly": "Monthly",
     "yearly": "Yearly",
     "starts": "Starts",
-    "backfill": "Every repeat since this date will be added."
+    "backfill": "Months missed up to today will be added.",
+    "saveFailed": "Couldn't save. Please try again."
   },
   "expense": {
     "today": "Today",
@@ -51,14 +56,19 @@
   "subscriptions": {
     "title": "Subscriptions",
     "empty": "No subscriptions yet",
-    "emptyHint": "Tap + to add a recurring expense.",
+    "emptyHint": "Add recurring expenses to see what's coming up.",
     "perMonth": "Per month",
-    "active": "Active",
     "paused": "Paused",
-    "next": "Next {{date}}",
     "pause": "Pause",
     "resume": "Resume",
-    "manageHint": "Deleting stops future charges. Past expenses are kept."
+    "manageHint": "Deleting stops future charges. Past expenses are kept.",
+    "add": "Add subscription",
+    "perYear": "Per year",
+    "nextRenewal": "Next renewal",
+    "comingUp": "Coming up",
+    "later": "Later",
+    "tomorrow": "Tomorrow",
+    "inDays": "In {{days}} days"
   },
   "settings": {
     "title": "Settings",
@@ -68,7 +78,6 @@
   },
   "currency": {
     "title": "Currency",
-    "search": "Search currency",
-    "hint": "Opens the list of currencies"
+    "search": "Search currency"
   }
 }

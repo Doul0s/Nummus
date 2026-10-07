@@ -24,10 +24,10 @@ export default function EditExpense() {
       {
         text: t("common.delete"),
         style: "destructive",
-        onPress: async () => {
-          await deleteExpense(db, expenseId);
-          router.back();
-        },
+        onPress: () =>
+          deleteExpense(db, expenseId)
+            .then(() => router.back())
+            .catch(() => Alert.alert(t("common.error"), t("common.tryAgain"))),
       },
     ]);
 

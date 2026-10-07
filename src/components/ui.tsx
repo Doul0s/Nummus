@@ -3,7 +3,9 @@ import { router } from "expo-router";
 import { type ComponentProps, type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Pressable,
+  type StyleProp,
   StyleSheet,
   Switch,
   Text,
@@ -11,10 +13,19 @@ import {
   type TextInputProps,
   type TextProps,
   View,
+  type ViewStyle,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { type TypeVariant, layout, radius, spacing, typography, useTheme } from "@/theme";
+import {
+  type TypeVariant,
+  layout,
+  radius,
+  spacing,
+  tabularNums,
+  typography,
+  useTheme,
+} from "@/theme";
 
 type TextTone = "default" | "muted" | "accent" | "danger";
 
@@ -22,13 +33,15 @@ type AppTextProps = TextProps & {
   variant?: TypeVariant;
   tone?: TextTone;
   numeric?: boolean;
+  fit?: boolean;
 };
 
-export function AppText({ variant = "body", tone = "default", numeric, style, ...props }: AppTextProps) {
+export function AppText({ variant = "body", tone = "default", numeric, fit, style, ...props }: AppTextProps) {
   const theme = useTheme();
   const color = { default: theme.text, muted: theme.muted, accent: theme.accent, danger: theme.danger }[tone];
+  const shrink = fit ? { numberOfLines: 1, adjustsFontSizeToFit: true, minimumFontScale: 0.6 } : null;
 
-  return <Text {...props} style={[typography[variant], { color }, numeric && styles.numeric, style]} />;
+  return <Text {...shrink} {...props} style={[typography[variant], { color }, numeric && tabularNums, style]} />;
 }
 
 type ButtonProps = {
@@ -87,7 +100,7 @@ export function IconButton({ name, label, onPress }: { name: IconName; label: st
 
 export function FieldLabel({ children }: { children: ReactNode }) {
   return (
-    <AppText variant="overline" tone="muted">
+    <AppText variant="section" tone="muted">
       {children}
     </AppText>
   );
@@ -138,6 +151,8 @@ export function Field({ label, error, style, onFocus, onBlur, ...input }: FieldP
 
 export function AmountInput({ error, style, ...input }: TextInputProps & { error?: string }) {
   const theme = useTheme();
+  const length = input.value?.length ?? 0;
+  const fontSize = length > 10 ? 30 : length > 8 ? 36 : typography.amountXL.fontSize;
 
   return (
     <View>
@@ -147,7 +162,8 @@ export function AmountInput({ error, style, ...input }: TextInputProps & { error
         placeholder="0"
         placeholderTextColor={theme.muted}
         selectionColor={theme.accent}
-        style={[typography.display, styles.amountInput, { color: theme.text }, style]}
+        maxFontSizeMultiplier={1.2}
+        style={[typography.amountXL, styles.amountInput, { color: theme.text, fontSize }, style]}
       />
       {error ? (
         <AppText variant="caption" tone="danger">
@@ -172,20 +188,27 @@ export function ScreenHeader({ title, right }: { title: string; right?: ReactNod
 type StatProps = {
   label: string;
   values: string[];
+  caption?: string;
   size?: "hero" | "regular";
+  style?: StyleProp<ViewStyle>;
 };
 
-export function Stat({ label, values, size = "regular" }: StatProps) {
+export function Stat({ label, values, caption, size = "regular", style }: StatProps) {
   return (
-    <View style={styles.stat}>
-      <AppText variant="overline" tone="muted">
+    <View style={[styles.stat, style]}>
+      <AppText variant="section" tone="muted">
         {label}
       </AppText>
       {values.map((value) => (
-        <AppText key={value} variant={size === "hero" ? "display" : "stat"} numeric>
+        <AppText key={value} variant={size === "hero" ? "amountXL" : "amount"} fit>
           {value}
         </AppText>
       ))}
+      {caption ? (
+        <AppText variant="caption" tone="muted" numberOfLines={1}>
+          {caption}
+        </AppText>
+      ) : null}
     </View>
   );
 }
@@ -200,7 +223,7 @@ type SectionHeaderProps = {
 export function SectionHeader({ title, right, actionLabel, onAction }: SectionHeaderProps) {
   return (
     <View style={styles.sectionHeader}>
-      <AppText variant="overline" tone="muted">
+      <AppText variant="section" tone="muted">
         {title}
       </AppText>
       {actionLabel ? (
@@ -223,11 +246,12 @@ type ListRowProps = {
   subtitle?: string;
   value?: string;
   trailing?: ReactNode;
+  dim?: boolean;
   onPress?: () => void;
   last?: boolean;
 };
 
-export function ListRow({ title, subtitle, value, trailing, onPress, last }: ListRowProps) {
+export function ListRow({ title, subtitle, value, trailing, dim, onPress, last }: ListRowProps) {
   const theme = useTheme();
 
   return (
@@ -238,13 +262,14 @@ export function ListRow({ title, subtitle, value, trailing, onPress, last }: Lis
       style={({ pressed }) => [
         styles.row,
         !last && { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.border },
+        dim && styles.dim,
         pressed && styles.pressed,
       ]}
     >
       <View style={styles.rowText}>
         <AppText numberOfLines={1}>{title}</AppText>
         {subtitle ? (
-          <AppText variant="caption" tone="muted">
+          <AppText variant="caption" tone="muted" numberOfLines={1}>
             {subtitle}
           </AppText>
         ) : null}
@@ -256,21 +281,6 @@ export function ListRow({ title, subtitle, value, trailing, onPress, last }: Lis
       ) : null}
       {trailing}
     </Pressable>
-  );
-}
-
-export function EmptyState({ title, hint }: { title: string; hint?: string }) {
-  return (
-    <View style={styles.empty}>
-      <AppText variant="headline" style={styles.centered}>
-        {title}
-      </AppText>
-      {hint ? (
-        <AppText variant="caption" tone="muted" style={styles.centered}>
-          {hint}
-        </AppText>
-      ) : null}
-    </View>
   );
 }
 
@@ -326,6 +336,43 @@ export function ToggleRow({ label, value, onValueChange }: ToggleRowProps) {
   );
 }
 
+type EmptyStateProps = {
+  title: string;
+  hint?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+};
+
+export function EmptyState({ title, hint, actionLabel, onAction }: EmptyStateProps) {
+  return (
+    <View style={styles.empty}>
+      <AppText variant="headline" style={styles.centered}>
+        {title}
+      </AppText>
+      {hint ? (
+        <AppText variant="caption" tone="muted" style={styles.centered}>
+          {hint}
+        </AppText>
+      ) : null}
+      {actionLabel && onAction ? (
+        <View style={styles.emptyAction}>
+          <Button title={actionLabel} onPress={onAction} variant="secondary" />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+export function Loading() {
+  const theme = useTheme();
+
+  return (
+    <View style={styles.loading}>
+      <ActivityIndicator color={theme.muted} />
+    </View>
+  );
+}
+
 export function AddFab({ repeat }: { repeat?: boolean }) {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -343,14 +390,12 @@ export function AddFab({ repeat }: { repeat?: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  numeric: {
-    fontVariant: ["tabular-nums"],
-  },
   centered: {
     textAlign: "center",
   },
   button: {
     minHeight: 52,
+    paddingHorizontal: layout.gutter,
     borderRadius: radius.md,
     borderWidth: 1,
     alignItems: "center",
@@ -366,7 +411,6 @@ const styles = StyleSheet.create({
   },
   amountInput: {
     padding: 0,
-    fontVariant: ["tabular-nums"],
   },
   screenHeader: {
     flexDirection: "row",
@@ -391,7 +435,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.md,
     marginHorizontal: layout.gutter,
-    paddingVertical: 14,
+    paddingVertical: spacing.compact,
+  },
+  dim: {
+    opacity: 0.55,
   },
   pressed: {
     opacity: 0.5,
@@ -413,6 +460,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
   },
+  disabled: {
+    opacity: 0.4,
+  },
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -423,6 +473,13 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingVertical: spacing.xl,
     paddingHorizontal: layout.gutter,
+  },
+  emptyAction: {
+    marginTop: spacing.md,
+  },
+  loading: {
+    alignItems: "center",
+    padding: spacing.xl,
   },
   fab: {
     position: "absolute",

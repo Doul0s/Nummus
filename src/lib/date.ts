@@ -19,6 +19,10 @@ export function fromIsoDate(isoDate: IsoDate): Date {
   return new Date(y, m - 1, d);
 }
 
+export function daysBetween(from: IsoDate, to: IsoDate): number {
+  return Math.round((fromIsoDate(to).getTime() - fromIsoDate(from).getTime()) / 86_400_000);
+}
+
 export function todayIso(): IsoDate {
   return toIsoDate(new Date());
 }
@@ -44,14 +48,6 @@ export function weekRange(
   return { startIso: toIsoDate(start), endIso: toIsoDate(end) };
 }
 
-export function formatMonthLabel(monthKey: string, languageTag: string): string {
-  const [y, m] = monthKey.split("-").map(Number);
-  const label = new Intl.DateTimeFormat(languageTag, { month: "long", year: "numeric" }).format(
-    new Date(y, m - 1, 1)
-  );
-  return label.charAt(0).toUpperCase() + label.slice(1);
-}
-
 export function formatDayLabel(isoDate: IsoDate, languageTag: string): string {
   if (isoDate === todayIso()) return i18nInstance.t("expense.today");
 
@@ -59,9 +55,12 @@ export function formatDayLabel(isoDate: IsoDate, languageTag: string): string {
   yesterday.setDate(yesterday.getDate() - 1);
   if (isoDate === toIsoDate(yesterday)) return i18nInstance.t("expense.yesterday");
 
+  const date = fromIsoDate(isoDate);
+  const sameYear = date.getFullYear() === new Date().getFullYear();
   return new Intl.DateTimeFormat(languageTag, {
+    weekday: "short",
     day: "numeric",
     month: "short",
-    year: "numeric",
-  }).format(fromIsoDate(isoDate));
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(date);
 }

@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 import { AppText, ListRow, SectionHeader } from "@/components/ui";
-import { layout, useTheme } from "@/theme";
+import { SETTINGS, setSetting } from "@/db/settings";
+import { layout, spacing, useTheme } from "@/theme";
 
 const LANGUAGES = [
   { code: "en", name: "English" },
@@ -13,7 +15,13 @@ const LANGUAGES = [
 
 export default function Settings() {
   const theme = useTheme();
+  const db = useSQLiteContext();
   const { t, i18n } = useTranslation();
+
+  const changeLanguage = (code: string) => {
+    i18n.changeLanguage(code);
+    setSetting(db, SETTINGS.language, code);
+  };
 
   return (
     <ScrollView>
@@ -25,7 +33,7 @@ export default function Settings() {
           key={code}
           title={name}
           last={i === LANGUAGES.length - 1}
-          onPress={() => i18n.changeLanguage(code)}
+          onPress={() => changeLanguage(code)}
           trailing={
             i18n.language.startsWith(code) ? (
               <Ionicons name="checkmark" size={20} color={theme.accent} />
@@ -35,7 +43,7 @@ export default function Settings() {
       ))}
 
       <SectionHeader title={t("settings.privacy")} />
-      <View style={styles.text}>
+      <View style={styles.block}>
         <AppText tone="muted">{t("settings.privacyText")}</AppText>
       </View>
     </ScrollView>
@@ -43,7 +51,8 @@ export default function Settings() {
 }
 
 const styles = StyleSheet.create({
-  text: {
+  block: {
     marginHorizontal: layout.gutter,
+    gap: spacing.sm,
   },
 });

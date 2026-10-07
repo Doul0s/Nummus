@@ -41,6 +41,10 @@ export const migrations: Migration[] = [
       `CREATE UNIQUE INDEX expenses_recurring_date_idx ON expenses (recurring_id, spent_at) WHERE recurring_id IS NOT NULL;`,
     ],
   },
+  {
+    version: 4,
+    statements: [`CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);`],
+  },
 ];
 
 export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {

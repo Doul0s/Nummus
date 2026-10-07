@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ExpenseForm } from "@/components/ExpenseForm";
-import { insertExpense, lastUsedCurrency } from "@/db/expenses";
-import { generateDueExpenses, insertRecurring } from "@/db/recurring";
+import { insertExpense } from "@/db/expenses";
+import { SETTINGS, getSetting, setSetting } from "@/db/settings";
+import { generateDueExpenses, insertRecurring } from "@/db/subscriptions";
 import { todayIso } from "@/lib/date";
 import { getDeviceCurrency } from "@/lib/money";
 
@@ -16,7 +17,9 @@ export default function Add() {
   const [currency, setCurrency] = useState<string | null>(null);
 
   useEffect(() => {
-    lastUsedCurrency(db).then((code) => setCurrency(code ?? getDeviceCurrency()));
+    getSetting(db, SETTINGS.currency)
+      .then((code) => setCurrency(code ?? getDeviceCurrency()))
+      .catch(() => setCurrency(getDeviceCurrency()));
   }, [db]);
 
   return (
@@ -40,6 +43,7 @@ export default function Add() {
             } else {
               await insertExpense(db, values);
             }
+            await setSetting(db, SETTINGS.currency, values.currencyCode).catch(() => {});
             router.back();
           }}
         />

@@ -5,7 +5,7 @@ import { FlatList, Modal, Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText, Field, IconButton, ListRow } from "@/components/ui";
-import { currencyName, currencyOptions } from "@/lib/money";
+import { currencyName, currencyOptions, currencySymbol } from "@/lib/money";
 import { layout, spacing, useTheme } from "@/theme";
 
 type Props = {
@@ -60,17 +60,22 @@ export function CurrencyPicker({ visible, selected, onSelect, onClose }: Props) 
           data={data}
           keyExtractor={(code) => code}
           keyboardShouldPersistTaps="handled"
-          renderItem={({ item, index }) => (
-            <ListRow
-              title={item}
-              subtitle={currencyName(item, i18n.language)}
-              onPress={() => choose(item)}
-              last={index === data.length - 1}
-              trailing={
-                item === selected ? <Ionicons name="checkmark" size={20} color={theme.accent} /> : undefined
-              }
-            />
-          )}
+          keyboardDismissMode="on-drag"
+          renderItem={({ item, index }) => {
+            const symbol = currencySymbol(item, i18n.language);
+            return (
+              <ListRow
+                title={item}
+                subtitle={currencyName(item, i18n.language)}
+                value={symbol === item ? undefined : symbol}
+                onPress={() => choose(item)}
+                last={index === data.length - 1}
+                trailing={
+                  item === selected ? <Ionicons name="checkmark" size={20} color={theme.accent} /> : undefined
+                }
+              />
+            );
+          }}
         />
       </View>
     </Modal>

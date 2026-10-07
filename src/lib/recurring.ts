@@ -32,7 +32,3 @@ export function nextRenewal(schedule: Schedule, today: IsoDate): IsoDate {
   while (dueDate(schedule, n) <= today) n++;
   return dueDate(schedule, n);
 }
-
-export function monthlyEquivalent(amountMinor: number, interval: Interval): number {
-  return interval === "monthly" ? amountMinor : Math.round(amountMinor / 12);
-}
