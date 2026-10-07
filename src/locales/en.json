@@ -74,10 +74,24 @@
     "title": "Settings",
     "language": "Language",
     "privacy": "Privacy",
-    "privacyText": "Nummus keeps all your data on this device. No account, no servers, no tracking."
+    "privacyText": "Nummus keeps all your data on this device. No account, no servers, no tracking.",
+    "security": "Security",
+    "lock": "Biometric lock",
+    "lockUnavailable": "Set up Face ID, a fingerprint or a screen lock in your device settings first.",
+    "lockAfter": "Lock after",
+    "immediately": "Immediately",
+    "after1": "1 min",
+    "after5": "5 min"
   },
   "currency": {
     "title": "Currency",
     "search": "Search currency"
+  },
+  "lock": {
+    "locked": "Locked",
+    "unlock": "Unlock",
+    "prompt": "Unlock Nummus",
+    "failed": "Couldn't verify it's you. Try again.",
+    "lockout": "Too many attempts. Try again later or use your device passcode."
   }
 }

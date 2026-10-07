@@ -319,15 +319,17 @@ type ToggleRowProps = {
   label: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
+  disabled?: boolean;
 };
 
-export function ToggleRow({ label, value, onValueChange }: ToggleRowProps) {
+export function ToggleRow({ label, value, onValueChange, disabled }: ToggleRowProps) {
   const theme = useTheme();
 
   return (
-    <View style={styles.toggleRow}>
+    <View style={[styles.toggleRow, disabled && styles.disabled]}>
       <AppText>{label}</AppText>
       <Switch
+        disabled={disabled}
         value={value}
         onValueChange={onValueChange}
         trackColor={{ false: theme.border, true: theme.accent }}

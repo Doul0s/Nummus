@@ -5,6 +5,7 @@ import { StatusBar } from "expo-status-bar";
 import { Suspense, useMemo } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 
+import { LockProvider } from "@/components/LockProvider";
 import { AppText, Button, Loading } from "@/components/ui";
 import { DATABASE_NAME, migrateDbIfNeeded } from "@/db/migrate";
 import { SETTINGS, getSetting } from "@/db/settings";
@@ -93,7 +94,9 @@ export default function RootLayout() {
   return (
     <Suspense fallback={<Splash />}>
       <SQLiteProvider databaseName={DATABASE_NAME} onInit={initDatabase} useSuspense>
-        <Navigator />
+        <LockProvider>
+          <Navigator />
+        </LockProvider>
       </SQLiteProvider>
     </Suspense>
   );

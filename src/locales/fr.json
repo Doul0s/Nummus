@@ -74,10 +74,24 @@
     "title": "Réglages",
     "language": "Langue",
     "privacy": "Confidentialité",
-    "privacyText": "Nummus garde toutes vos données sur cet appareil. Pas de compte, pas de serveur, aucun suivi."
+    "privacyText": "Nummus garde toutes vos données sur cet appareil. Pas de compte, pas de serveur, aucun suivi.",
+    "security": "Sécurité",
+    "lock": "Verrouillage biométrique",
+    "lockUnavailable": "Configurez d'abord Face ID, une empreinte ou un verrouillage d'écran dans les réglages de votre appareil.",
+    "lockAfter": "Verrouiller après",
+    "immediately": "Immédiatement",
+    "after1": "1 min",
+    "after5": "5 min"
   },
   "currency": {
     "title": "Devise",
     "search": "Rechercher une devise"
+  },
+  "lock": {
+    "locked": "Verrouillé",
+    "unlock": "Déverrouiller",
+    "prompt": "Déverrouiller Nummus",
+    "failed": "Impossible de vous identifier. Réessayez.",
+    "lockout": "Trop de tentatives. Réessayez plus tard ou utilisez le code de l'appareil."
   }
 }
